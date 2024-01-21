@@ -3,14 +3,14 @@ FROM ubuntu
 WORKDIR /app
 
 COPY requirements.txt /app
-COPY finalproject /app
+COPY pythonproject /app
 
 RUN apt-get update && \
     apt-get install -y python3 python3-pip && \
     pip install -r requirements.txt && \
     chmod -R 777 /app && \
-    chmod -R 777 /app/finalproject && \
-    cd myproject
+    chmod -R 777 /app/pythonproject && \
+    cd pythonproject
 
 EXPOSE 8000
 
