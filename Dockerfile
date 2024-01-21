@@ -1,16 +1,16 @@
-FROM ubuntu
+FROM python:3.8
 
 WORKDIR /app
 
 COPY requirements.txt /app
-COPY pythonProject /app
+COPY pythonProject /app/pythonProject
 
 RUN apt-get update && \
-    apt-get install -y python3 python3-pip && \
     pip install -r requirements.txt && \
     chmod -R 777 /app && \
-    chmod -R 777 /app/pythonProject && \
-    cd pythonProject
+    chmod -R 777 /app/pythonProject
+
+WORKDIR /app/pythonProject
 
 EXPOSE 8000
 
