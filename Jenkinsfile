@@ -54,11 +54,12 @@ pipeline {
                     sh '''
                         git config user.email "shaiksaiteja7095@gmail.com"
                         git config user.name "saiteja"
-                        sed -i "s/\${current_tag}/${BUILD_NUMBER}/g" Kubernetes/deployment.yml
+                        sed -i "/image: shaiksaiteja\/final-sem-cicd:${current_tag}/d" Kubernetes/deployment.yml
+                        sed -i "19i\ \ \ \ \ \ \ \ \ image: shaiksaiteja/final-sem-cicd:${BUILD_NUMBER}" Kubernetes/deployment.yml
                         git add Kubernetes/deployment.yml
-                        git commit -m "Update deployment image to version ${BUILD_NUMBER}"
+                        git commit -m "Update deployment image tag to version ${BUILD_NUMBER}"
                         git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main
-                        '''
+                    '''
                 }
             }
         }
