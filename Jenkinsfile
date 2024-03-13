@@ -26,12 +26,16 @@ pipeline {
                 }
             }
         }
-
-        stage('Push Docker Image') {
-            steps {
+stage('LOGIN TO DOCKERHUB') {
+    steps {
+        withCredentials([usernamePassword(credentialsId: 'saiteja_jen_docker', usernameVariable: 'DOCKERHUB_CREDENTIALS_USR', passwordVariable: 'DOCKERHUB_CREDENTIALS_PSW')]) {
+            sh "docker login -u $DOCKERHUB_CREDENTIALS_USR -p $DOCKERHUB_CREDENTIALS_PSW"
+        }
+stage('Push Docker Image') {
+    steps {
                 script {
                     def dockerImage = docker.image("${DOCKER_IMAGE}")
-                    docker.withRegistry('https://index.docker.io/v1/', credentials('docker-cred')) {
+                    {
                         dockerImage.push()
                     }
                 }
