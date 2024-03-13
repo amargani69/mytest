@@ -51,8 +51,11 @@ pipeline {
             }
             steps {
                 script {
+                    // Retrieve the current tag from deployment.yml
+                    def currentTag = sh(script: "cat Kubernetes/deployment.yml | grep 'image: shaiksaiteja/final-sem-cicd:' | awk -F ':' '{print \$3}'", returnStdout: true).trim()
+
                     // Update the deployment file
-                    sh "sed -i 's/image: shaiksaiteja\\/final-sem-cicd:\${current_tag}/image: shaiksaiteja\\/final-sem-cicd:${BUILD_NUMBER}/g' Kubernetes/deployment.yml"
+                    sh "sed -i 's/image: shaiksaiteja\\/final-sem-cicd:${currentTag}/image: shaiksaiteja\\/final-sem-cicd:${BUILD_NUMBER}/g' Kubernetes/deployment.yml"
                     
                     // Commit and push the changes to the repository
                     withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
