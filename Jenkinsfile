@@ -26,18 +26,20 @@ pipeline {
                 }
             }
         }
-stage('LOGIN TO DOCKERHUB') {
-    steps {
-        withCredentials([usernamePassword(credentialsId: 'saiteja_jen_docker', usernameVariable: 'DOCKERHUB_CREDENTIALS_USR', passwordVariable: 'DOCKERHUB_CREDENTIALS_PSW')]) {
-            sh "docker login -u $DOCKERHUB_CREDENTIALS_USR -p $DOCKERHUB_CREDENTIALS_PSW"
+
+        stage('Login to DockerHub') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'saiteja_jen_docker', usernameVariable: 'DOCKERHUB_CREDENTIALS_USR', passwordVariable: 'DOCKERHUB_CREDENTIALS_PSW')]) {
+                    sh "docker login -u $DOCKERHUB_CREDENTIALS_USR -p $DOCKERHUB_CREDENTIALS_PSW"
+                }
+            }
         }
-stage('Push Docker Image') {
-    steps {
+
+        stage('Push Docker Image') {
+            steps {
                 script {
                     def dockerImage = docker.image("${DOCKER_IMAGE}")
-                    {
-                        dockerImage.push()
-                    }
+                    dockerImage.push()
                 }
             }
         }
