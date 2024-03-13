@@ -44,24 +44,23 @@ pipeline {
             }
         }
 
-        stage('Update Deployment File in K8S manifest & push to Repo') {
-            environment {
-                GIT_REPO_NAME = "finalproject"
-                GIT_USER_NAME = "shaiksaiteja"
-            }
-            steps {
-                withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
-                    sh '''
-                        git config user.email "shaiksaiteja7095@gmail.com"
-                        git config user.name "saiteja"
-                        sed -i "/image: shaiksaiteja\/final-sem-cicd:${current_tag}/d" Kubernetes/deployment.yml
-                        sed -i "19i\ \ \ \ \ \ \ \ \ image: shaiksaiteja/final-sem-cicd:${BUILD_NUMBER}" Kubernetes/deployment.yml
-                        git add Kubernetes/deployment.yml
-                        git commit -m "Update deployment image tag to version ${BUILD_NUMBER}"
-                        git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main
-                    '''
-                }
+stage('Update Deployment File in K8S manifest & push to Repo') {
+    steps {
+        script {
+            // Update the deployment file
+            sh "sed -i 's/image: shaiksaiteja\\/final-sem-cicd:\${current_tag}/image: shaiksaiteja\\/final-sem-cicd:${BUILD_NUMBER}/g' Kubernetes/deployment.yml"
+            
+            // Commit and push the changes to the repository
+            withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
+                sh '''
+                    git config user.email "shaiksaiteja7095@gmail.com"
+                    git config user.name "saiteja"
+                    git add Kubernetes/deployment.yml
+                    git commit -m "Update deployment image to version ${BUILD_NUMBER}"
+                    git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main
+                '''
             }
         }
     }
+}
 }
