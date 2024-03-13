@@ -45,6 +45,10 @@ pipeline {
         }
 
         stage('Update Deployment File in K8S manifest & push to Repo') {
+            environment {
+                GIT_REPO_NAME = "finalproject"
+                GIT_USER_NAME = "shaiksaiteja"
+            }
             steps {
                 script {
                     // Update the deployment file
