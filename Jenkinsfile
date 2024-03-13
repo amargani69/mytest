@@ -1,55 +1,61 @@
 pipeline {
-    agent any
-    environment {
-        DOCKERHUB_CREDENTIALS = credentials('saiteja_jen_docker')
-        IMAGE_NAME = "shaiksaiteja/finalsemproject:${env.BUILD_NUMBER}"
+    agent {
+        docker {
+            image 'abhishekf5/maven-abhishek-docker-agent:v1'
+            args '--user root -v /var/run/docker.sock:/var/run/docker.sock'
+        }
     }
 
     stages {
-        stage('SCM Checkout') {
-            steps {
-                git 'https://github.com/shaiksaiteja/IQAP.git', branch: 'main'
-            }
-        }
-
-        stage('Build Docker img') {
+        stage('Git Checkout') {
             steps {
                 script {
-                    sh 'docker build -t shaiksaiteja/finalsemproject:$BUILD_NUMBER .'
+                    git branch: 'main', url: 'https://github.com/shaiksaiteja/finalproject.git'
                 }
             }
         }
 
-        stage('LOGIN TO DOCKERHUB') {
+        stage('Build Docker Image') {
+            environment {
+                DOCKER_IMAGE = "shaiksaiteja/final-sem-cicd:${BUILD_NUMBER}"
+                REGISTRY_CREDENTIALS = credentials('docker-cred')
+            }
             steps {
                 script {
-                    sh 'docker --version'
-                    withCredentials([usernamePassword(credentialsId: 'saiteja_jen_docker', usernameVariable: 'DOCKERHUB_CREDENTIALS_USR', passwordVariable: 'DOCKERHUB_CREDENTIALS_PSW')]) {
-                        sh "docker login -u $DOCKERHUB_CREDENTIALS_USR -p $DOCKERHUB_CREDENTIALS_PSW"
+                    sh "docker build -t ${DOCKER_IMAGE} ."
+                }
+            }
+        }
+
+        stage('Push Docker Image') {
+            steps {
+                script {
+                    def dockerImage = docker.image("${DOCKER_IMAGE}")
+                    docker.withRegistry('https://index.docker.io/v1/', "docker-cred") {
+                        dockerImage.push()
                     }
                 }
             }
         }
-stage('Run Docker Container') {
-    steps {
-        script {
-            sh 'docker run -p 8080:8000 -d shaiksaiteja/finalsemproject:$BUILD_NUMBER'
-        }
-    }
-}
 
-        stage('PUSH IMAGE') {
+        stage('Update Deployment File in K8S manifest & push to Repo') {
+            environment {
+                GIT_REPO_NAME = "finalproject"
+                GIT_USER_NAME = "shaiksaiteja"
+            }
             steps {
-                script {
-                    sh 'docker push shaiksaiteja/finalsemproject:$BUILD_NUMBER'
+                withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
+                    sh '''
+                        git config user.email "shaiksaiteja7095@gmail.com"
+                        git config user.name "saiteja"
+                        BUILD_NUMBER=${BUILD_NUMBER}
+                        sed -i '' "s/${current_tag}/${BUILD_NUMBER}/g" Kubernetes/deployment.yml
+                        git add Kubernetes/deployment.yml
+                        git commit -m "Update deployment image to version ${BUILD_NUMBER}"
+                        git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main
+                    '''
                 }
             }
-        }
-    }
-
-    post {
-        always {
-            sh 'docker logout'
         }
     }
 }
