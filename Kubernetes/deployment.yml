@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: AQI-app
+  labels:
+    app: myfinalproject
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: myfinalproject
+  template:
+    metadata:
+      labels:
+        app: myfinalproject
+    spec:
+      containers:
+      - name: AQI-app
+        image: shaiksaiteja/final-sem-cicd:${current_tag}
+        ports:
+        - containerPort: 8000
