@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: AQI-app
+  name: aqi-app
   labels:
     app: myfinalproject
 spec:
@@ -15,7 +15,7 @@ spec:
         app: myfinalproject
     spec:
       containers:
-      - name: AQI-app
+      - name: aqi-app
         image: shaiksaiteja/final-sem-cicd:15
         ports:
         - containerPort: 8000
