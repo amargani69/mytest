@@ -16,6 +16,6 @@ spec:
     spec:
       containers:
       - name: aqi-app
-        image: shaiksaiteja/final-sem-cicd:38
+        image: shaiksaiteja/final-sem-cicd:39
         ports:
         - containerPort: 8000
